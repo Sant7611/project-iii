@@ -13,23 +13,20 @@ class Post(models.Model):
     - featured_img: Kept from your design! Good addition. upload_to organizes files.
     - user -> renamed to 'author' for clarity (author writes, user reads).
     """
-    STATUS_CHOICES = [
-        ('draft', 'Draft'),
-        ('published', 'Published'),
-    ]
+
     
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
     content = models.TextField()
-    featured_img = models.ImageField(upload_to='posts/%Y/%m/', blank=True, null=True)
+    featured_img = models.ImageField(upload_to='posts/', blank=True, null=True)
     # share_code renamed to short_code to match the Base62 algorithm guide
-    short_code = models.CharField(max_length=10, unique=True, blank=True)
+    short_code = models.CharField(max_length=10, unique=True, blank=True, null=True)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='posts'
     )
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+    is_published = models.BooleanField(default=False)
     view_count = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -49,13 +46,7 @@ class Post(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
-        
-        # # Generate short_code AFTER first save, because we need the auto-assigned ID
-        # if not self.short_code:
-            
-        #     self.short_code = encode(self.id)
-        #     self.save(update_fields=['short_code'])
-    
+
     def __str__(self):
         return self.title
 
@@ -113,7 +104,7 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        ordering = ['created_at']
+        ordering = ['-created_at']
     
     def __str__(self):
         return f"Comment by {self.author} on {self.post}"
