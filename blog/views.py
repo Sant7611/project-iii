@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from django.contrib.auth import get_user_model
 from .utils.serializers import post_to_dict, comment_to_dict
+from django.core.paginator import Paginator
 
 User = get_user_model()
 user = User.objects.first()
@@ -19,9 +20,16 @@ def home(request):
             .select_related("author")
             .prefetch_related("tags")
         )
+        page_number = request.GET.get('page', 1)
+
+        paginator = Paginator(posts, 2)
+        page_obj = paginator.get_page(page_number)
+
         return JsonResponse(
             {
                 "count": posts.count(),
+                "num_pages":paginator.num_pages,
+                'current_page':page_obj.number,
                 "result": [
                     {
                         "id": post.id,
@@ -32,7 +40,7 @@ def home(request):
                         "is_published": post.is_published,
                         "view_count": post.view_count,
                     }
-                    for post in posts
+                    for post in page_obj
                 ],
             }
         )
@@ -91,7 +99,7 @@ def comment_list(request, post_id):
 
     if request.method == "GET":
         comments = (
-            Comment.objects.filter(post__id=post_id)
+            Comment.objects.filter(post_id=post_id)
             .filter(parent=None)
             .select_related("author")
             .prefetch_related("replies")
