@@ -7,4 +7,5 @@ urlpatterns = [
     path('api/posts/<int:pk>/', views.post_detail, name='post_details'),
     path('api/posts/<int:post_id>/comments/', views.comment_list, name='comment_list'),
     path('api/comments/<int:pk>/', views.comment_detail, name='comment_detail'),
+    path('api/search/', views.search, name='search')
 ]

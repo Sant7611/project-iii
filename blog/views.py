@@ -7,9 +7,12 @@ import json
 from django.contrib.auth import get_user_model
 from .utils.serializers import post_to_dict, comment_to_dict
 from django.core.paginator import Paginator
+from .utils.searchengine import SearchEngine
 
 User = get_user_model()
 user = User.objects.first()
+
+search_engine = SearchEngine()
 
 
 @csrf_exempt
@@ -31,15 +34,7 @@ def home(request):
                 "num_pages":paginator.num_pages,
                 'current_page':page_obj.number,
                 "result": [
-                    {
-                        "id": post.id,
-                        "title": post.title,
-                        "slug": post.slug,
-                        "short_code": post.short_code,
-                        "author": post.author.username,
-                        "is_published": post.is_published,
-                        "view_count": post.view_count,
-                    }
+                    post_to_dict(post)
                     for post in page_obj
                 ],
             }
@@ -163,3 +158,30 @@ def comment_detail(request, pk):
         comment.delete()
         return JsonResponse({"message": "deleted successfully"}, status=200)
     return JsonResponse({"error": "method not allowed"}, status=405)
+
+
+@csrf_exempt
+def search(request):
+
+    if request.method !='GET':
+        return JsonResponse({'Error':'GET only'}, status=405)
+    
+    query = request.GET.get('q', '')
+    if len(query) <2 :
+        return JsonResponse({'error':"there should be more than 2 chars."}, status=400)
+    
+
+    if not search_engine.documents:
+        search_engine.build_index(Post.objects.filter(is_published=True))
+    
+    results = search_engine.search(query)
+
+    return JsonResponse(
+        {
+            "count": len(results),
+            "result": [
+                post_to_dict(Post.objects.get(pk=doc_id)) for doc_id, score in results
+            ],
+        },
+        status=200,
+    )
