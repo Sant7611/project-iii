@@ -226,14 +226,14 @@ def recommender(request, user_id):
         #     return JsonResponse({'error':'user is not authenticated'}, status=401)
         
         cr.build_matrix(Like.objects.all())
-        posts = cr.recommend(user_id)
-        ids = [post_id for post_id,score in posts ]
-        post_i = Post.objects.filter(id__in=ids)
+        results = cr.recommend(user_id)
+        post_ids = [post_id for post_id,score in results ]
+        posts = Post.objects.filter(pk__in=post_ids)
 
-        post_map = {post.id:post for post in post_i}
+        post_map = {post.id:post for post in posts}
 
         recommendation = []
-        for post_id, score in posts:
+        for post_id, score in results:
             post = post_map.get(post_id)
             if post:
                 recommendation.append({'post': {'id':post.id,'title':post.title, 'slug':post.slug, 'content':post.content }, 'score':score})
