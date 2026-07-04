@@ -185,3 +185,30 @@ def search(request):
         },
         status=200,
     )
+
+@csrf_exempt
+def like(request, post_id):
+
+    #check if user exists or not.
+    if not user:
+        return JsonResponse({'error':'no user available'}, status=400)
+
+
+    try:
+        post = Post.objects.get(pk=post_id)
+    except Post.DoesNotExist:
+        return JsonResponse({'error':'post not found'}, status=404)
+    
+    if request.method == 'GET':
+        liked = Like.objects.filter(user=user, post=post).exists() #check if user liked post or not
+        count = Like.objects.filter(post=post).count()
+        return JsonResponse({'count':count, 'liked':liked})
+    
+    elif request.method == 'POST':
+        liked, created = Like.objects.get_or_create(post=post, user=user)
+        if not created:
+            liked.delete()
+            return JsonResponse({'liked':False, 'count':Like.objects.filter(post=post).count()})
+        
+        return JsonResponse({'liked':True, 'count':Like.objects.filter(post=post).count()})
+    return JsonResponse({'error':'method not allowed'}, status=405)
