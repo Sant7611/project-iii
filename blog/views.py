@@ -8,9 +8,12 @@ from django.contrib.auth import get_user_model
 from .utils.serializers import post_to_dict, comment_to_dict
 from django.core.paginator import Paginator
 from .utils.searchengine import SearchEngine
+from .utils.collaborativeRecommender import CollaborativeRecommender
+
+cr = CollaborativeRecommender()
 
 User = get_user_model()
-user = User.objects.first()
+user = User.objects.get(pk=1)
 
 search_engine = SearchEngine()
 
@@ -212,3 +215,30 @@ def like(request, post_id):
         
         return JsonResponse({'liked':True, 'count':Like.objects.filter(post=post).count()})
     return JsonResponse({'error':'method not allowed'}, status=405)
+
+
+@csrf_exempt
+def recommender(request, user_id):
+    if request.method == 'GET':
+
+        # user = request.user
+        # if not user.is_authenticated:
+        #     return JsonResponse({'error':'user is not authenticated'}, status=401)
+        
+        cr.build_matrix(Like.objects.all())
+        posts = cr.recommend(user_id)
+        ids = [post_id for post_id,score in posts ]
+        post_i = Post.objects.filter(id__in=ids)
+
+        post_map = {post.id:post for post in post_i}
+
+        recommendation = []
+        for post_id, score in posts:
+            post = post_map.get(post_id)
+            if post:
+                recommendation.append({'post': {'id':post.id,'title':post.title, 'slug':post.slug, 'content':post.content }, 'score':score})
+
+
+
+        print(user)
+        return JsonResponse({'user_id':user.id ,'username':user.username, 'recommendation':recommendation})
