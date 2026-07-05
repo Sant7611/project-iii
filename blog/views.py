@@ -13,7 +13,7 @@ from .utils.collaborativeRecommender import CollaborativeRecommender
 cr = CollaborativeRecommender()
 
 User = get_user_model()
-user = User.objects.get(pk=1)
+
 
 search_engine = SearchEngine()
 
@@ -44,6 +44,7 @@ def home(request):
         )
 
     elif request.method == "POST":
+        user = User.objects.get(pk=1)
         if not user:
             return JsonResponse({"error": "no user to assign as author"})
 
@@ -133,7 +134,7 @@ def comment_list(request, post_id):
                 Comment.objects.get(pk=parent_id, post=post)  
             except Comment.DoesNotExist:
                 return JsonResponse({"error": "Parent comment not found"}, status=400)
-
+        user = User.objects.get(pk=1)
         comment = Comment.objects.create(
             post=post, author=user, content=content, parent_id=parent_id
         )
@@ -191,7 +192,7 @@ def search(request):
 
 @csrf_exempt
 def like(request, post_id):
-
+    user = User.objects.get(pk=1)
     #check if user exists or not.
     if not user:
         return JsonResponse({'error':'no user available'}, status=400)
@@ -231,7 +232,7 @@ def recommender(request, user_id):
         posts = Post.objects.filter(pk__in=post_ids)
 
         post_map = {post.id:post for post in posts}
-
+        user = User.objects.get(pk=1)
         if not Like.objects.filter(user=user).exists():
             return JsonResponse({
                 'user_id': user.id,

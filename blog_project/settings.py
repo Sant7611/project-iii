@@ -143,3 +143,14 @@ MEDIA_ROOT= BASE_DIR / 'static'
 
 #for accessing user
 AUTH_USER_MODEL = 'accounts.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # We'll configure this properly on Day 11
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        # We'll configure this on Day 11
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}
