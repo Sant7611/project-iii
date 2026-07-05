@@ -232,6 +232,14 @@ def recommender(request, user_id):
 
         post_map = {post.id:post for post in posts}
 
+        if not Like.objects.filter(user=user).exists():
+            return JsonResponse({
+                'user_id': user.id,
+                'username': user.username,
+                'message': 'Like some posts to get recommendations!',
+                'recommendations': []
+            })
+
         recommendation = []
         for post_id, score in results:
             post = post_map.get(post_id)
@@ -242,3 +250,5 @@ def recommender(request, user_id):
 
         print(user)
         return JsonResponse({'user_id':user.id ,'username':user.username, 'recommendation':recommendation})
+    else:
+        return JsonResponse({'error':'method not allowed'}, status=405)
