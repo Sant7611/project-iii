@@ -2,19 +2,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Category, Comment, Post, Like, Tag
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from .utils.serializers import PostSerializer, CommentListSerializer, CommentDetailSerializer
-from django.core.paginator import Paginator
 from .utils.searchengine import SearchEngine
 from .utils.collaborativeRecommender import CollaborativeRecommender
 from rest_framework import viewsets
 
 cr = CollaborativeRecommender()
-
-User = get_user_model()
 
 
 search_engine = SearchEngine()
@@ -53,6 +47,7 @@ class PostView(viewsets.ViewSet):
 
 
 class CommentViewset(viewsets.ModelViewSet):
+    lookup_field = 'pk'  # Use 'pk' for the comment's primary key
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return CommentDetailSerializer
@@ -70,7 +65,8 @@ class CommentViewset(viewsets.ModelViewSet):
         if post_id is not None:
             post = get_object_or_404(Post, pk=post_id)
             serializer.save(post=post, author=self.request.user)
-        serializer.save(author=self.request.user)
+        else:
+            serializer.save(author=self.request.user)
 
     
 
