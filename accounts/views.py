@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from .utils.decorators import token_required
 from django.contrib.auth import login, logout
 from accounts.models import APIToken
+from rest_framework import viewsets
 
 User = get_user_model()
 # Create your views here.
@@ -77,7 +78,13 @@ def test_decorator(request):
 def user_logout(request):
     if request.method == 'POST':
         auth_header = request.headers.get('Authorization', '')
-        token_str = auth_header.split()[1]
+        parts = auth_header.split()
+        if len(parts) != 2:
+            return JsonResponse({'error': 'Invalid authorization header'}, status=401) 
+        token_str = parts[1]
         APIToken.objects.filter(token=token_str).delete()
         return JsonResponse({'message':f'{request.user.username} logged out'})
     return JsonResponse({'error':'method not allowed'}, status=401)
+
+# class RegisterView(viewsets.ModelViewSet):
+#     queryset = User.objects.all()

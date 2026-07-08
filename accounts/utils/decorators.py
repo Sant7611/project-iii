@@ -9,7 +9,7 @@ def token_required(func):
     def wrapper(request, *args, **kwargs):
         auth_header = request.headers.get("Authorization", "")
         parts = auth_header.split()
-        if len(parts) != 2 and parts[0] != "Token":
+        if len(parts) != 2 or parts[0] != "Token":
             return JsonResponse({"error": "token required"}, status=401)
         token = parts[1]
         try:

@@ -1,13 +1,21 @@
 from django.urls import path, include
 from . import views
 from rest_framework.routers import DefaultRouter
+from rest_framework_nested import routers
+
 
 router = DefaultRouter()
 router.register(r'posts', views.PostView, basename='post')
-router.register(r'comments', views.CommentViewset, basename='comment')
+# router.register(r'comments', views.CommentViewset, basename='comment')
+
+post_comment_router = routers.NestedDefaultRouter(router, r'posts', lookup='post')
+post_comment_router.register(r'comments', views.CommentViewset, basename='post-comments')
 
 urlpatterns = [
     path('api/',include(router.urls)),
+    path('api/', include(post_comment_router.urls))
+
+
     # path('api/posts/<int:pk>/',views.ListView.as_view()),
     
     # path('api/posts/<int:pk>/', views.post_detail, name='post_details'),

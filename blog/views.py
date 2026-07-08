@@ -1,4 +1,5 @@
 from rest_framework.response import Response
+from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Category, Comment, Post, Like, Tag
 from django.http import JsonResponse
@@ -22,41 +23,56 @@ search_engine = SearchEngine()
 class PostView(viewsets.ViewSet):
 
     def list(self,request):
-        queryset = Post.objects.all()
+        queryset = Post.objects.filter(is_published=True)
         serializer = PostSerializer(queryset, many=True)
 
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def create(self,request):
         serializer = PostSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     def retrieve(self, request, pk):
         post = get_object_or_404(Post,pk=pk)
         serializer = PostSerializer(post)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def update(self, request, pk):
         post = get_object_or_404(Post,pk=pk)
         serializer = PostSerializer(post, data=request.data)
         serializer.is_valid(raise_exception=True)
-        return Response(serializer.data)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, pk):
         post = get_object_or_404(Post,pk=pk)
         post.delete()
-        return 
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CommentViewset(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return CommentDetailSerializer
         return CommentListSerializer
 
+    def get_queryset(self):
+        post_id = self.kwargs.get('post_pk')  # Filter comments by post_id from URL
+        if post_id:
+            comments = Comment.objects.filter(post_id = post_id)
+            return comments
+        return Comment.objects.all()
+
+    def perform_create(self, serializer):
+        post_id = self.kwargs.get('post_pk')
+        if post_id is not None:
+            post = get_object_or_404(Post, pk=post_id)
+            serializer.save(post=post, author=self.request.user)
+        serializer.save(author=self.request.user)
+
+    
 
 # @csrf_exempt
 # def home(request):
