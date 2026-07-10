@@ -21,25 +21,3 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.username
-
-class APIToken(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tokens')
-    token = models.CharField(unique=True, max_length=50, null=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
-
-
-    def generate_token(self):
-        token = secrets.token_urlsafe(20)
-        return token
-    
-    def save(self, *args, **kwargs):
-        if not self.token:
-            self.token = self.generate_token()
-        if not self.expires_at:
-            self.expires_at  = timezone.now() +timedelta(minutes=100)
-        super().save(*args, **kwargs)
-        
-    def __str__(self):
-        return f'token for {self.user.username}'
