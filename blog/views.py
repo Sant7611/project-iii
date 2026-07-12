@@ -1,12 +1,13 @@
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.permissions import (IsAuthenticatedOrReadOnly, IsAdminUser, IsAuthenticated)
+from rest_framework.decorators import permission_classes
+from .permissions import IsOwnerorReadOnly, IsCommentAuthorOrPostOwnerOrStaff, ReadOnly
 from django.shortcuts import get_object_or_404
 from .models import Category, Comment, Post, Like, Tag
-from django.contrib.auth.models import User
 from .utils.serializers import PostSerializer, CommentListSerializer, CommentDetailSerializer
 from .utils.searchengine import SearchEngine
 from .utils.collaborativeRecommender import CollaborativeRecommender
 from rest_framework import viewsets
+from .paginations import PageNumPagination
 
 cr = CollaborativeRecommender()
 
@@ -14,37 +15,36 @@ cr = CollaborativeRecommender()
 search_engine = SearchEngine()
 
 
-class PostView(viewsets.ViewSet):
+# class PostView(viewsets.ViewSet):
 
-    def list(self,request):
-        queryset = Post.objects.filter(is_published=True)
-        serializer = PostSerializer(queryset, many=True)
+#     def list(self,request):
+#         queryset = Post.objects.filter(is_published=True)
+#         serializer = PostSerializer(queryset, many=True)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def create(self,request):
-        serializer = PostSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+#     def create(self,request):
+#         serializer = PostSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-    def retrieve(self, request, pk):
-        post = get_object_or_404(Post,pk=pk)
-        serializer = PostSerializer(post)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+#     def retrieve(self, request, pk):
+#         post = get_object_or_404(Post,pk=pk)
+#         serializer = PostSerializer(post)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def update(self, request, pk):
-        post = get_object_or_404(Post,pk=pk)
-        serializer = PostSerializer(post, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+#     def update(self, request, pk):
+#         post = get_object_or_404(Post,pk=pk)
+#         serializer = PostSerializer(post, data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def destroy(self, request, pk):
-        post = get_object_or_404(Post,pk=pk)
-        post.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
+#     def destroy(self, request, pk):
+#         post = get_object_or_404(Post,pk=pk)
+#         post.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class CommentViewset(viewsets.ModelViewSet):
     lookup_field = 'pk'  # Use 'pk' for the comment's primary key

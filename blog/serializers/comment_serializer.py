@@ -1,15 +1,6 @@
 from rest_framework import serializers
-from blog.models import Post, Comment
-from django.shortcuts import get_object_or_404
+from blog.models import Comment
 
-#upgrading to model serializer.
-class PostSerializer(serializers.ModelSerializer):
-    author_username = serializers.CharField(source='author.username', read_only=True)
-    class Meta:
-        model = Post
-        fields = ['id', 'title', 'slug', 'content', 'author', 'author_username', 
-                  'is_published', 'view_count', 'featured_img', 'short_code', 
-                  'created_at', 'updated_at']
 
 class CommentListSerializer(serializers.ModelSerializer):
     reply_count = serializers.IntegerField(source='replies.count' ,read_only=True)
