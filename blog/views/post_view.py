@@ -1,5 +1,5 @@
 from rest_framework.permissions import (IsAuthenticatedOrReadOnly, IsAdminUser, IsAuthenticated)
-from ..permissions import IsOwnerorReadOnly, IsCommentAuthorOrPostOwnerOrStaff, ReadOnly
+from ..permissions import IsOwnerorReadOnly, IsCommentAuthorOrPostOwnerOrStaff
 from rest_framework.decorators import action
 from ..models import  Post
 from rest_framework import viewsets
@@ -19,7 +19,7 @@ class PostView(viewsets.ModelViewSet):
         if self.action == 'list':
             queryset = Post.objects.filter(is_published=True)
             return queryset
-        return self.queryset
+        return Post.objects.select_related('author').prefetch_related('tags', 'comments')
     
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:

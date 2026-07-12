@@ -22,7 +22,3 @@ class IsCommentAuthorOrPostOwnerOrStaff(permissions.BasePermission):
         
         return user.is_staff==user
     
-class ReadOnly(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return obj.method in permissions.SAFE_METHODS
- 

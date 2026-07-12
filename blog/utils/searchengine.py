@@ -13,7 +13,7 @@ class SearchEngine():
         return words
     
     def add_document(self,doc_id, title, content):
-        text = f'{title} { content}'
+        text = f'{title} {content}'
         words = self._tokenize(text)
         words_count = Counter(words)
 
