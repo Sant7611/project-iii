@@ -3,7 +3,7 @@ from blog.views import post_view, refresh_token
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
 from rest_framework_simplejwt.views import TokenRefreshView
-from blog.views.search_view import SearchView
+from blog.views import search_view, recommendation_view
 
 
 
@@ -18,7 +18,8 @@ router.register(r'posts', post_view.PostView, basename='post')
 urlpatterns = [
     path('api/',include(router.urls)),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='refresh_token'),
-    path('api/search/', SearchView.as_view(), name='search'),
+    path('api/search/', search_view.SearchView.as_view(), name='search'),
+    path('api/recommendation/', recommendation_view.Recommendation.as_view(), name='recommendation'),
     # path('api/', include(post_comment_router.urls))
 
 

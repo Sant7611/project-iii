@@ -25,7 +25,6 @@ class SearchView(APIView):
         post_dict= {post.id:post for post in posts }
         ordered_posts = [post_dict[pid] for pid in post_ids if pid in post_dict ]
 
-
         serializer = PostSearchSerializer(ordered_posts, many=True)
 
         return Response({
