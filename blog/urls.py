@@ -1,19 +1,23 @@
 from django.urls import path, include
-from . import views
+from blog.views import post_view, refresh_token
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
+from rest_framework_simplejwt.views import TokenRefreshView
+
 
 
 router = DefaultRouter()
-router.register(r'posts', views.PostView, basename='post')
+router.register(r'posts', post_view.PostView, basename='post')
+
 # router.register(r'comments', views.CommentViewset, basename='comment')
 
-post_comment_router = routers.NestedDefaultRouter(router, r'posts', lookup='post')
-post_comment_router.register(r'comments', views.CommentViewset, basename='post-comments')
+# post_comment_router = routers.NestedDefaultRouter(router, r'posts', lookup='post')
+# post_comment_router.register(r'comments', views.CommentViewset, basename='post-comments')
 
 urlpatterns = [
     path('api/',include(router.urls)),
-    path('api/', include(post_comment_router.urls))
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='refresh_token')
+    # path('api/', include(post_comment_router.urls))
 
 
     # path('api/posts/<int:pk>/',views.ListView.as_view()),

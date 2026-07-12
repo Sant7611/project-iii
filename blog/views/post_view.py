@@ -5,7 +5,8 @@ from ..models import  Post
 from rest_framework import viewsets
 from ..paginations import PageNumPagination
 from blog.serializers.post_serializer import PostSerializer, PostCreateUpdateSerializer
-from time import timezone
+from django.utils import timezone
+from rest_framework.response import Response
 
 
 class PostView(viewsets.ModelViewSet):
@@ -18,21 +19,21 @@ class PostView(viewsets.ModelViewSet):
         if self.action == 'list':
             queryset = Post.objects.filter(is_published=True)
             return queryset
-        return queryset
+        return self.queryset
     
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
             return PostCreateUpdateSerializer
         return PostSerializer
     
-    @action(detail=True, methods=['post'], url_name='my-posts', permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'], url_path='my-posts', permission_classes=[IsAuthenticated])
     def my_posts(self, request):
-        queryset = Post.objects.filter(author=request.user).order_by('-created_at')
-        serializer = PostSerializer(queryset, many=True)
-        return serializer.data
+        posts = Post.objects.filter(author=request.user).order_by('-created_at')
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
     
     @action(detail=True, methods=['post'])
-    def publish(self, request):
+    def publish(self, request, pk=None):
         post = self.get_object()
         post.is_published=True
         post.published_at=timezone.now()
@@ -45,7 +46,7 @@ class PostView(viewsets.ModelViewSet):
         })
     
     @action(detail=True, methods=['post'])
-    def unpublish(self, request):
+    def unpublish(self, request, pk=None):
         post = self.get_object()
         post.is_published=False
         post.published_at=None
@@ -56,4 +57,3 @@ class PostView(viewsets.ModelViewSet):
             'message':'post unpublished successfully',
             'post':serializer.data
         })
-    
