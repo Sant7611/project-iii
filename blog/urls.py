@@ -1,9 +1,8 @@
 from django.urls import path, include
-from blog.views import post_view, refresh_token
+from blog.views import post_view, refresh_token, search_view, recommendation_view, comment_view
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
 from rest_framework_simplejwt.views import TokenRefreshView
-from blog.views import search_view, recommendation_view
 
 
 
@@ -12,15 +11,15 @@ router.register(r'posts', post_view.PostView, basename='post')
 
 # router.register(r'comments', views.CommentViewset, basename='comment')
 
-# post_comment_router = routers.NestedDefaultRouter(router, r'posts', lookup='post')
-# post_comment_router.register(r'comments', views.CommentViewset, basename='post-comments')
+post_comment_router = routers.NestedDefaultRouter(router, r'posts', lookup='post')
+post_comment_router.register(r'comments', comment_view.Comment_View, basename='post-comments')
 
 urlpatterns = [
-    path('api/',include(router.urls)),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='refresh_token'),
-    path('api/search/', search_view.SearchView.as_view(), name='search'),
-    path('api/recommendation/', recommendation_view.Recommendation.as_view(), name='recommendation'),
-    # path('api/', include(post_comment_router.urls))
+    path('',include(router.urls)),
+    path('token/refresh/', TokenRefreshView.as_view(), name='refresh_token'),
+    path('search/', search_view.SearchView.as_view(), name='search'),
+    path('recommendation/', recommendation_view.Recommendation.as_view(), name='recommendation'),
+    path('', include(post_comment_router.urls))
 
 
     # path('api/posts/<int:pk>/',views.ListView.as_view()),

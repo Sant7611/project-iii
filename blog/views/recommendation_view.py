@@ -24,5 +24,5 @@ class Recommendation(APIView):
 
         return Response({
             'count':len(posts),
-            'results':serializer.data
+            'recommendation results':serializer.data
         })

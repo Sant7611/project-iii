@@ -1,5 +1,5 @@
-from rest_framework.permissions import (IsAuthenticatedOrReadOnly, IsAdminUser, IsAuthenticated)
-from ..permissions import IsOwnerorReadOnly, IsCommentAuthorOrPostOwnerOrStaff
+from rest_framework.permissions import (IsAuthenticatedOrReadOnly, IsAuthenticated)
+from ..permissions import IsOwnerorReadOnly
 from rest_framework.decorators import action
 from ..models import  Post
 from rest_framework import viewsets
@@ -13,13 +13,13 @@ class PostView(viewsets.ModelViewSet):
     queryset = Post.objects.select_related('author').prefetch_related('tags', 'comments')
     serializer_class  = PostSerializer
     pagination_class = PageNumPagination
-    permission_classes = [IsOwnerorReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly,IsOwnerorReadOnly]
 
     def get_queryset(self):
         if self.action == 'list':
-            queryset = Post.objects.filter(is_published=True)
+            queryset = self.queryset.filter(is_published=True)
             return queryset
-        return Post.objects.select_related('author').prefetch_related('tags', 'comments')
+        return self.queryset
     
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
@@ -28,18 +28,23 @@ class PostView(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'], url_path='my-posts', permission_classes=[IsAuthenticated])
     def my_posts(self, request):
-        posts = Post.objects.filter(author=request.user).order_by('-created_at')
-        serializer = PostSerializer(posts, many=True)
+        posts = self.queryset.filter(author=request.user).order_by('-created_at')
+
+        page = self.paginate_queryset(posts)
+        if page:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
     
     @action(detail=True, methods=['post'])
     def publish(self, request, pk=None):
         post = self.get_object()
         post.is_published=True
-        post.published_at=timezone.now()
-        post.save()
+        post.updated_at=timezone.now()
+        post.save(update_fields=['is_published', 'updated_at'])
 
-        serializer = PostSerializer(post, context=self.get_serializer_context())
+        serializer = self.get_serializer(post)
         return Response({
             'message':'post published successfully',
             'post':serializer.data
@@ -49,10 +54,10 @@ class PostView(viewsets.ModelViewSet):
     def unpublish(self, request, pk=None):
         post = self.get_object()
         post.is_published=False
-        post.published_at=None
-        post.save()
+        post.updated_at=timezone.now()
+        post.save(update_fields=['is_published', 'updated_at']  )
 
-        serializer = PostSerializer(post, context=self.get_serializer_context())
+        serializer = self.get_serializer(post)
         return Response({
             'message':'post unpublished successfully',
             'post':serializer.data
