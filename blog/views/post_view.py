@@ -7,13 +7,15 @@ from ..paginations import PageNumPagination
 from blog.serializers.post_serializer import PostSerializer, PostCreateUpdateSerializer
 from django.utils import timezone
 from rest_framework.response import Response
+from blog.utils.filters import PostFilter
 
 
 class PostView(viewsets.ModelViewSet):
-    queryset = Post.objects.select_related('author').prefetch_related('tags', 'comments')
+    queryset = Post.objects.select_related('author').prefetch_related('tags', 'comments', 'categories')
     serializer_class  = PostSerializer
     pagination_class = PageNumPagination
     permission_classes = [IsAuthenticatedOrReadOnly,IsOwnerorReadOnly]
+    filterset_class = PostFilter
 
     def get_queryset(self):
         if self.action == 'list':
