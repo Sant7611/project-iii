@@ -1,8 +1,9 @@
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
+from base.models import BaseModel
 
-class Post(models.Model):
+class Post(BaseModel):
     """
     The core content model.
     
@@ -51,7 +52,7 @@ class Post(models.Model):
         return self.title
 
 
-class Category(models.Model):
+class Category(BaseModel):
     """
     Kept from your design! Categories are broader buckets than tags.
     Example: "Technology", "Lifestyle". A post can belong to multiple categories.
@@ -63,7 +64,7 @@ class Category(models.Model):
         return self.name
 
 
-class Tag(models.Model):
+class Tag(BaseModel):
     """
     Tags are specific keywords. "django", "python", "tutorial".
     """
@@ -73,7 +74,7 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
-class Comment(models.Model):
+class Comment(BaseModel):
     """
     Adjacency List pattern for threaded comments.
     
@@ -110,7 +111,7 @@ class Comment(models.Model):
         return f"Comment by {self.author} on {self.post} - {self.content}"
 
 
-class Like(models.Model):
+class Like(BaseModel):
     """
     A user likes a post.
     

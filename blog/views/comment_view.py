@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from blog.permissions import IsOwnerorReadOnly, IsCommentAuthorOrPostOwnerOrStaff
+from blog.permissions import  IsCommentAuthorOrPostOwnerOrStaff
 from blog.models import Comment
 from blog.serializers.comment_serializer import CommentDetailSerializer, CommentListSerializer
 

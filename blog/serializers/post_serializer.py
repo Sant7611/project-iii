@@ -12,22 +12,21 @@ class PostSerializer(serializers.ModelSerializer):
         read_only_fields= ('id', 'slug', 'author', 'view_count', 'short_code', 'created_at', 'updated_at')
 
 class PostCreateUpdateSerializer(serializers.ModelSerializer):
-    tags = serializers.SlugRelatedField(many=True, required=False, slug_field='name', queryset=Tag.objects.all())
-
+    tags = serializers.ListField(child=serializers.CharField(), required=False)
+    
     class Meta:
         model=Post
-        fields = ['title', 'content', 'tags', 'featured_img']
+        fields = ['id','title', 'content', 'tags', 'featured_img']
 
     def create(self, validated_data):
-        tags = validated_data.pop('tags',[])
+        tags = validated_data.pop('tags',None)
         post = Post.objects.create(**validated_data)
-
-        self._set_tags(post, tags)
-        post.save()
+        if tags is not None:
+            self._set_tags(post, tags)
         return post
 
     def update(self, instance, validated_data):
-        tag_names = validated_data.pop('tags', [])
+        tag_names = validated_data.pop('tags', None)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -39,6 +38,8 @@ class PostCreateUpdateSerializer(serializers.ModelSerializer):
         return instance
     
     def _set_tags(self, post, tags):
+        taglist=[]
         for tag_name in tags:
             tag, _ = Tag.objects.get_or_create(name=tag_name.lower().strip())
-            post.tags.add(tag)
+            taglist.append(tag)
+        post.tags.set(taglist)

@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from blog.utils.collaborativeRecommender import CollaborativeRecommender
 from blog.models import Like, Post
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+from utils.response_helper import success_response, error_response
 
 
 class Recommendation(APIView):
@@ -22,7 +22,11 @@ class Recommendation(APIView):
         ordered_posts = [post_dict[pid] for pid in post_ids if pid in post_dict]
         serializer = PostSearchSerializer(ordered_posts, many=True)
 
-        return Response({
+        # return Response({
+        #     'count':len(posts),
+        #     'recommendation results':serializer.data
+        # })
+        return success_response(data={
             'count':len(posts),
             'recommendation results':serializer.data
-        })
+        }, status=200)

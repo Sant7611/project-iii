@@ -1,5 +1,6 @@
 from django.urls import path, include
-from blog.views import post_view, refresh_token, search_view, recommendation_view, comment_view
+from accounts.views import refresh_token
+from blog.views import post_view, search_view, recommendation_view, comment_view
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
 from rest_framework_simplejwt.views import TokenRefreshView

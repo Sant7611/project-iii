@@ -2,9 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from blog.utils.searchengine import SearchEngine
-from django.db.models import Q
 from blog.models import Post
 from blog.serializers.search_serializer import PostSearchSerializer
+from utils.response_helper import error_response, success_response
 
 class SearchView(APIView):
 
@@ -13,7 +13,7 @@ class SearchView(APIView):
     def get(self,request):
         query = request.query_params.get('q', '').strip()
         if len(query) <=2 or not query:
-            return Response({'error':'the length of the search should be at least 2'}, status=status.HTTP_400_BAD_REQUEST)
+            return error_response(message='the length of the search should be at least 2', status=status.HTTP_400_BAD_REQUEST)
         
         posts = Post.objects.filter(is_published=True).select_related('author').distinct()
         self.se.build_index(posts)
@@ -27,8 +27,8 @@ class SearchView(APIView):
 
         serializer = PostSearchSerializer(ordered_posts, many=True)
 
-        return Response({
+        return success_response(data={
             'query':query,
             'count':len(posts),
             'results':serializer.data
-        })
+        }, status=200)
