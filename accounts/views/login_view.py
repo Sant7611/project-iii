@@ -3,7 +3,7 @@ from accounts.serializers.login_serilaizer import LoginSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from utils.response_helper import success_response, error_response
 
-class LoginView(generics.genericAPIView):
+class LoginView(generics.GenericAPIView):
     
     
     

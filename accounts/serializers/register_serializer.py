@@ -1,3 +1,5 @@
+from django.db import transaction
+from accounts.models import Profile
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
@@ -9,17 +11,19 @@ class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password', 'password2')
+        fields = ('id', 'username','first_name', 'last_name', 'email', 'password', 'password2')
 
     def validate(self, attrs):
         password = attrs['password']
-        password2 = attrs.pop(password2)
+        password2 = attrs.pop('password2')
         if password != password2:
             raise serializers.ValidationError("Password must match")
         return attrs
     
+    @transaction.atomic
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
+        Profile.objects.create(user=user)
         return user
     
     def to_representation(self, instance):

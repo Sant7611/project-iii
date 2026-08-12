@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.response import Response
+from utils.response_helper import success_response, error_response
 from rest_framework import status
 
 class LogoutView(APIView):
@@ -13,7 +13,7 @@ class LogoutView(APIView):
             if refresh:
                 token = RefreshToken(refresh)
                 token.blacklist()
-                return Response({'message':'user successfully logged out'}, status=status.HTTP_200_OK)
-            return Response({'error':'refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
+                return success_response(message='user successfully logged out', status_code=status.HTTP_200_OK)
+            return error_response(message='refresh token is required', status_code=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({'error':str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return error_response(errors=str(e), status_code=status.HTTP_400_BAD_REQUEST)

@@ -1,11 +1,9 @@
 from rest_framework.permissions import (IsAuthenticatedOrReadOnly, IsAuthenticated)
-from ..permissions import IsOwnerorReadOnly
+from blog.permissions import IsOwnerorReadOnly
 from rest_framework.decorators import action
-from ..models import  Post
+from blog.models import  Post
 from rest_framework import viewsets
-from ..paginations import PageNumPagination
 from blog.serializers.post_serializer import PostSerializer, PostCreateUpdateSerializer
-from rest_framework.response import Response
 from blog.utils.filters import PostFilter
 from utils.response_helper import success_response, error_response
 
@@ -13,7 +11,6 @@ from utils.response_helper import success_response, error_response
 class PostView(viewsets.ModelViewSet):
     queryset = Post.objects.select_related('author').prefetch_related('tags', 'comments', 'categories')
     serializer_class  = PostSerializer
-    pagination_class = PageNumPagination
     permission_classes = [IsAuthenticatedOrReadOnly,IsOwnerorReadOnly]
     filterset_class = PostFilter
     ordering_fields= ['title', 'created_at']

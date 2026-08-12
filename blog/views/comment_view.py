@@ -1,12 +1,12 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from blog.permissions import  IsCommentAuthorOrPostOwnerOrStaff
+from blog.permissions import  IsCommentUserOrPostOwnerOrStaff
 from blog.models import Comment
 from blog.serializers.comment_serializer import CommentDetailSerializer, CommentListSerializer
 
 class Comment_View(viewsets.ModelViewSet):
     queryset = Comment.objects.all().select_related('post', 'author','parent').prefetch_related('replies')
-    permission_classes = [IsAuthenticatedOrReadOnly, IsCommentAuthorOrPostOwnerOrStaff ]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsCommentUserOrPostOwnerOrStaff ]
 
     def get_serializer_class(self):
         if self.action == 'list':

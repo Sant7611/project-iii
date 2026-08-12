@@ -24,13 +24,17 @@ class BaseModel(models.Model):
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         related_name='%(class)s_created'
-    )
+    )  
 
     updated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='%(class)s_updated'
+        related_name='%(class)s_updated',
+        null=True,
+        blank=True
     )
 
     class Meta:

@@ -9,15 +9,12 @@ class User(AbstractUser, BaseModel):
         ('user', 'user')
     )
     phone = models.CharField(max_length=15, blank=True, null=True)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
     role = models.CharField(max_length=50, default='user', choices=ROLE_CHOICES)
-    email = models.EmailField(unique=True)
     is_deleted=models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    email=models.EmailField(unique=True)
 
     USERNAME_FIELD='email'
-    REQUIRED_FIELDS=['username', 'email']
+    REQUIRED_FIELDS=['username']
     class Meta:
         constraints= [
             models.UniqueConstraint(
