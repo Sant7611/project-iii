@@ -19,12 +19,12 @@ class Post(BaseModel):
     class PostStatus(models.TextChoices):
         PENDING = "pending", "Pending"
         APPROVED = "approved", "Approved"
+        REJECTED= "rejected", 'Rejected'
 
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
     content = models.TextField()
     featured_img = models.ImageField(upload_to="posts/", blank=True, null=True)
-    # share_code renamed to short_code to match the Base62 algorithm guide
     short_code = models.CharField(max_length=10, unique=True, blank=True, null=True)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="posts"
@@ -33,13 +33,18 @@ class Post(BaseModel):
     approval_status = models.CharField(
         choices=PostStatus.choices, default=PostStatus.PENDING, max_length=20
     )
-    approved_by = models.ForeignKey(
+    reviewed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="approved_posts",
+        related_name="reviewed_posts",
+        limit_choices_to=models.Q(role="moderator")
+        | models.Q(role="super_admin"),
     )
+
+    reviewed_at = models.DateTimeField(null=True, blank=True, auto_add=True)
+    rejection_reason = models.TextField(blank=True)
 
     class Meta:
         ordering = ["-created_at"]

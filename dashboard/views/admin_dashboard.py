@@ -3,14 +3,14 @@ from rest_framework import generics
 from blog.models import Post
 from utils.response_helper import success_response, error_response
 from django.contrib.auth import get_user_model
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAdminUser
 
 User = get_user_model()
 
 
 class AdminDashboardView(generics.GenericAPIView):
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUser]
 
     def get(self, request):
         try:

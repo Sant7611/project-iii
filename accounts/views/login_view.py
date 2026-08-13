@@ -5,10 +5,10 @@ from utils.response_helper import success_response, error_response
 
 class LoginView(generics.GenericAPIView):
     
-    
+    serializer_class = LoginSerializer
     
     def post(self, request):
-        serializer = LoginSerializer(data=request.data, context={'request': request})
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         refresh = RefreshToken.for_user(user)

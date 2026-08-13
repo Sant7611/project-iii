@@ -2,14 +2,15 @@ from django.db import transaction
 from accounts.models import Profile
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from base.serializers import BaseModelSerializer
 
 User = get_user_model()
 
-class RegisterSerializer(serializers.ModelSerializer):
+class RegisterSerializer(BaseModelSerializer):
     password = serializers.CharField(write_only = True, required=True)
     password2 = serializers.CharField(write_only = True, required=True)
     email = serializers.EmailField(required=True)
-    class Meta:
+    class Meta(BaseModelSerializer.Meta):
         model = User
         fields = ('id', 'username','first_name', 'last_name', 'email', 'password', 'password2')
 

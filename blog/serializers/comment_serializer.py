@@ -1,26 +1,35 @@
 from rest_framework import serializers
 from blog.models import Comment
+from base.serializers import BaseModelSerializer
 
 
-class CommentListSerializer(serializers.ModelSerializer):
+class CommentListSerializer(BaseModelSerializer):
     reply_count = serializers.IntegerField(source='replies.count' ,read_only=True)
     author = serializers.StringRelatedField(read_only=True)
-    class Meta:
+    class Meta(BaseModelSerializer.Meta):
         model = Comment
         fields=('id',  'author', 'parent', 'content','created_at', 'reply_count')
-        read_only_fields = ('id', 'author', 'created_at', 'reply_count')
+        read_only_fields = BaseModelSerializer.Meta.read_only_fields + ('author', 'reply_count')
 
 
-class CommentDetailSerializer(serializers.ModelSerializer):
-    replies = serializers.SerializerMethodField()
+class CommentDetailSerializer(BaseModelSerializer):
+    replies = CommentListSerializer(
+        many=True,
+        read_only=True
+    )
 
-    class Meta:
+    class Meta(BaseModelSerializer.Meta):
         model = Comment
-        fields=('id', 'author', 'parent', 'content', 'created_at','replies')
-        read_only_fields = ('id', 'author', 'created_at', 'replies')
+        fields = (
+            'id',
+            'author',
+            'parent',
+            'content',
+            'created_at',
+            'replies',
+        )
 
-    def get_replies(self,obj):
-        if obj.replies.exists():
-            serializer = CommentListSerializer(obj.replies.all(), many=True)
-            return serializer.data
-        return []
+        read_only_fields = (
+            BaseModelSerializer.Meta.read_only_fields
+            + ('author', 'replies')
+        )

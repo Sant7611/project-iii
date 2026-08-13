@@ -3,15 +3,27 @@ from django.conf import settings
 
 class SoftDeleteQuerySet(models.QuerySet):
     def delete(self):
-        update_kwargs = {'is_deleted':True, 'is_active':False}
-        return self.update(update_kwargs)
+        update_kwargs = {'is_deleted':True}
+        
+        field_names = [f.name for f in self.model._meta.get_fields()]
+        
+        if 'is_active' in field_names:
+            update_kwargs['is_active'] = True
+            
+        return self.update(**update_kwargs)
     
     def hard_delete(self):
         return super().delete()
     
     def restore(self):
-        update_kwargs = {'is_deleted':False, 'is_active':True}
-        return self.update(update_kwargs)
+        update_kwargs = {'is_deleted':False}
+
+        field_names = [f.name for f in self.model._meta.get_fields()]
+        
+        if 'is_active' in field_names:
+            update_kwargs['is_active'] = True
+            
+        return self.update(**update_kwargs)
     
 class SoftDeleteManager(models.Manager):
     def get_queryset(self):

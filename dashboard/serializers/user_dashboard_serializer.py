@@ -1,5 +1,5 @@
-from rest_framework.serializers import ModelSerializer
+from base.serializers import BaseModelSerializer
 
 
-class UserDashboardSerializer(ModelSerializer):
+class UserDashboardSerializer(BaseModelSerializer):
     pass
