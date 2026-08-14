@@ -16,7 +16,7 @@ class Recommendation(APIView):
 
         results = self.cr.recommend(request.user.id)
         post_ids = [post_id for post_id, similarity in results]
-        posts = Post.objects.filter(id__in=post_ids, is_published=True)
+        posts = Post.objects.filter(id__in=post_ids, approval_status=Post.PostStatus.APPROVED)
         post_dict = {post.id:post for post in posts}
 
         ordered_posts = [post_dict[pid] for pid in post_ids if pid in post_dict]

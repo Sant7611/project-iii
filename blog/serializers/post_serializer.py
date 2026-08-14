@@ -12,7 +12,7 @@ class PostSerializer(BaseModelSerializer):
         read_only_fields = BaseModelSerializer.Meta.read_only_fields + ('slug', 'author', 'view_count', 'short_code')
 
 class PostCreateUpdateSerializer(BaseModelSerializer):
-    tags = serializers.ListField(child=serializers.CharField(), required=False)
+    tags = serializers.ListField(child=serializers.CharField(), required=False, write_only=True)
     
     class Meta(BaseModelSerializer.Meta):
         model=Post
@@ -45,17 +45,29 @@ class PostCreateUpdateSerializer(BaseModelSerializer):
             taglist.append(tag)
         post.tags.set(taglist)
         
-class OwnerPostSerializer(PostSerializer):
+    def to_representation(self, instance):
+        return PostSerializer(
+            instance,
+            context=self.context,
+        ).data
+        
+class OwnerPostListSerializer(PostSerializer):
     class Meta(PostSerializer.Meta):
         fields = PostSerializer.Meta.fields + [
             "approval_status",
-            "rejection_reason",
             "reviewed_at",
         ]
         read_only_fields = PostSerializer.Meta.read_only_fields + (
             "approval_status",
-            "rejection_reason",
             "reviewed_at",
+        )
+
+
+class OwnerPostSerializer(OwnerPostListSerializer):
+    class Meta(OwnerPostListSerializer.Meta):
+        fields = OwnerPostListSerializer.Meta.fields + ["rejection_reason"]
+        read_only_fields = OwnerPostListSerializer.Meta.read_only_fields + (
+            "rejection_reason",
         )
 
 class PostModerationSerializer(OwnerPostSerializer):

@@ -17,6 +17,7 @@ class LoginView(generics.GenericAPIView):
             'access': str(refresh.access_token),
             'user_id': user.id,
             'username': user.username,
-            'email': user.email
+            'email': user.email,
+            'role':user.role
         }
         return success_response(data=data, status=200)

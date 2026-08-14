@@ -1,10 +1,13 @@
-from rest_framework.viewsets import ModelViewSet
-from accounts.models import Profile, User
+from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.permissions import IsAuthenticated
+
 from accounts.serializers.profile_serializer import UserSerializer
 
 
-class ProfileView(ModelViewSet):
-    queryset= User.objects.all()
-    serializer_class= UserSerializer
-    
-    
+class ProfileView(RetrieveUpdateAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get", "patch", "head", "options"]
+
+    def get_object(self):
+        return self.request.user

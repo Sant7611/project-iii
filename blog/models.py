@@ -43,7 +43,7 @@ class Post(BaseModel):
         | models.Q(role="super_admin"),
     )
 
-    reviewed_at = models.DateTimeField(null=True, blank=True, auto_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
     rejection_reason = models.TextField(blank=True)
 
     class Meta:
@@ -133,3 +133,20 @@ class Like(BaseModel):
 
     def __str__(self):
         return f"{self.user.username} likes {self.post.title}"
+
+
+class SavedPost(BaseModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='saved_posts')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE,  related_name='saved_by')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "post"],
+                name="unique_saved_post_per_user",
+            ),
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user} saved {self.post}"

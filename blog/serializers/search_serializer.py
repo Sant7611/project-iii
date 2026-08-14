@@ -4,6 +4,7 @@ from rest_framework import serializers
 class PostSearchSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     title = serializers.CharField()
+    slug = serializers.CharField()
     excerpt = serializers.SerializerMethodField()
     author = serializers.CharField(source="author.username", read_only=True)
     created_at = serializers.DateTimeField()

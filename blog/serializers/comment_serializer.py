@@ -13,10 +13,8 @@ class CommentListSerializer(BaseModelSerializer):
 
 
 class CommentDetailSerializer(BaseModelSerializer):
-    replies = CommentListSerializer(
-        many=True,
-        read_only=True
-    )
+    author = serializers.StringRelatedField(read_only=True)
+    replies = CommentListSerializer(many=True, read_only=True)
 
     class Meta(BaseModelSerializer.Meta):
         model = Comment

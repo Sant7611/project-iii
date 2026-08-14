@@ -1,5 +1,4 @@
 from accounts.models import Profile, User
-from rest_framework import serializers
 from base.serializers import BaseModelSerializer
 
 
@@ -10,19 +9,20 @@ class ProfileSerializer(BaseModelSerializer):
         
         
 class UserSerializer(BaseModelSerializer):
-    profile = ProfileSerializer()
+    profile = ProfileSerializer(required=False)
+
     class Meta(BaseModelSerializer.Meta):
         model = User
         fields = ['id', 'profile', 'first_name', 'last_name', 'email', 'username', 'phone']
-        
-    def update(self,instance, validated_data):
-        profile_data = validated_data.pop('profile')
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('profile', None)
         instance = super().update(instance, validated_data)
-        
+
         if profile_data:
-            profile = instance.profile
+            profile, _ = Profile.objects.get_or_create(user=instance)
             for attr, value in profile_data.items():
                 setattr(profile, attr, value)
             profile.save()
-        
+
         return instance

@@ -1,8 +1,9 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from blog.permissions import  IsCommentUserOrPostOwnerOrStaff
+from utils.permissions import  IsCommentUserOrPostOwnerOrStaff
 from blog.models import Comment
 from blog.serializers.comment_serializer import CommentDetailSerializer, CommentListSerializer
+from rest_framework.exceptions import ValidationError
 
 class Comment_View(viewsets.ModelViewSet):
     queryset = Comment.objects.all().select_related('post', 'author','parent').prefetch_related('replies')
@@ -23,8 +24,15 @@ class Comment_View(viewsets.ModelViewSet):
         return self.queryset
     
     def perform_create(self, serializer):
-            serializer.save(
-                author = self.request.user,
-                post_id = self.kwargs.get('post_pk')
-            )
-        
+        post_id = int(self.kwargs["post_pk"])
+        parent = serializer.validated_data.get("parent")
+
+        if parent and parent.post_id != post_id:
+            raise ValidationError({
+                "parent": "The parent comment must belong to the same post."
+            })
+
+        serializer.save(
+            author=self.request.user,
+            post_id=post_id,
+        )
