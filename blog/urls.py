@@ -1,6 +1,5 @@
 from django.urls import path, include
-from accounts.views import refresh_token
-from blog.views import post_view, search_view, recommendation_view, comment_view
+from blog.views import post_view, search_view, recommendation_view, comment_view, savedPost_view
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -9,11 +8,13 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 router = DefaultRouter()
 router.register(r'posts', post_view.PostView, basename='post')
+router.register(r'saved', savedPost_view.SavedPostView, basename='saved_posts')
 
 # router.register(r'comments', views.CommentViewset, basename='comment')
 
 post_comment_router = routers.NestedDefaultRouter(router, r'posts', lookup='post')
 post_comment_router.register(r'comments', comment_view.Comment_View, basename='post-comments')
+
 
 urlpatterns = [
     path('',include(router.urls)),

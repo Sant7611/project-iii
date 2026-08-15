@@ -13,6 +13,12 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             or obj.author_id == request.user.id
         )
 
+class IsSuperAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.role == "super_admin"
+        )
 
 
 class IsModeratorOrSuperAdmin(permissions.BasePermission):

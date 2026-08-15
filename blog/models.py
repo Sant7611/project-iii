@@ -138,7 +138,6 @@ class Like(BaseModel):
 class SavedPost(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='saved_posts')
     post = models.ForeignKey(Post, on_delete=models.CASCADE,  related_name='saved_by')
-
     class Meta:
         constraints = [
             models.UniqueConstraint(

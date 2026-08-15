@@ -1,5 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
+from django.utils import timezone
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -9,10 +10,11 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
+        # Every account has one private group. This gives every persisted
+        # notification a matching recipient and notification ID.
         self.group_name = f"notification_{self.user.id}"
 
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-
         await self.accept()
         
         await self.send(text_data=json.dumps({
@@ -28,12 +30,14 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         
     async def send_notification(self, event):
         await self.send(text_data=json.dumps({
-            'event':'post_approval',
+            'event':'notification',
             'data':{
                 'id':event['id'],
                 'title':event['title'],
                 "notification_type": event.get("notification_type", "post_pending"),
-                "created_at": event["created_at"],
+                "post_id": event.get("post_id", None),
+                "slug": event.get("slug", None),
+                "created_at": event.get("created_at", timezone.now()),
                 "is_read": event.get("is_read", False),
                 'body':event['body']
             }
