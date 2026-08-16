@@ -8,7 +8,7 @@ class SoftDeleteQuerySet(models.QuerySet):
         field_names = [f.name for f in self.model._meta.get_fields()]
         
         if 'is_active' in field_names:
-            update_kwargs['is_active'] = True
+            update_kwargs['is_active'] = False
             
         return self.update(**update_kwargs)
     

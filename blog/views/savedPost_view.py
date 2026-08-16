@@ -1,9 +1,9 @@
-from rest_framework.viewsets import ModelViewSet
+from rest_framework import mixins, viewsets
 from blog.models import SavedPost
 from rest_framework.permissions import IsAuthenticated
 from blog.serializers.savedPost_serializer import SavedPostSerializer 
 
-class SavedPostView(ModelViewSet):
+class SavedPostView(mixins.ListModelMixin,mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     
     permission_classes = [IsAuthenticated]
     serializer_class = SavedPostSerializer

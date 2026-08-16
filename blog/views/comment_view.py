@@ -6,7 +6,7 @@ from blog.serializers.comment_serializer import CommentDetailSerializer, Comment
 from rest_framework.exceptions import ValidationError
 
 class Comment_View(viewsets.ModelViewSet):
-    queryset = Comment.objects.all().select_related('post', 'author','parent').prefetch_related('replies')
+    queryset = Comment.objects.all().select_related('post', 'author','parent').prefetch_related('replies').filter(post__approval_status='approved')
     permission_classes = [IsAuthenticatedOrReadOnly, IsCommentUserOrPostOwnerOrStaff ]
 
     def get_serializer_class(self):

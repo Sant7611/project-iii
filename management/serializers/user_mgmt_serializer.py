@@ -10,7 +10,7 @@ class UserManagementSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(required=False)
     class Meta:
         model = User
-        fields = ['id', 'profile', 'first_name', 'last_name', 'email', 'username', 'phone', 'role']
+        fields = ['id', 'profile', 'first_name', 'last_name', 'email', 'username', 'phone']
         read_only_fields = fields
         
 class ModeratorRegisterSerializer(RegisterSerializer):

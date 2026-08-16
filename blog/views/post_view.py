@@ -17,6 +17,7 @@ from django.utils import timezone
 from notifications.models import Notification
 from django.db.models import Q
 from rest_framework.response import Response
+from django.db import transaction
 
 
 class PostView(viewsets.ModelViewSet):
@@ -135,29 +136,30 @@ class PostView(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], permission_classes=[IsModeratorOrSuperAdmin])
     def accept(self, request, pk=None):
-        post = self.get_object()
-        if post.approval_status == Post.PostStatus.APPROVED:
-            return error_response(message="post already approved", status=400)
-        post.approval_status = Post.PostStatus.APPROVED
-        post.reviewed_by = request.user
-        post.reviewed_at = timezone.now()
-        post.rejection_reason = ""
-        post.save(
-            update_fields=[
-                "approval_status",
-                "reviewed_by",
-                "reviewed_at",
-                "rejection_reason",
-            ]
-        )
+        with transaction.atomic():
+            post = self.get_queryset().select_for_update().get(pk=pk)
+            if post.approval_status == Post.PostStatus.APPROVED:
+                return error_response(message="post already approved", status=400)
+            post.approval_status = Post.PostStatus.APPROVED
+            post.reviewed_by = request.user
+            post.reviewed_at = timezone.now()
+            post.rejection_reason = ""
+            post.save(
+                update_fields=[
+                    "approval_status",
+                    "reviewed_by",
+                    "reviewed_at",
+                    "rejection_reason",
+                ]
+            )
 
-        event = {
-            "title": "Post Approval",
-            "body": f"{post.title} post has been approved",
-            "slug": post.slug,
-            "notification_type": (Notification.NotificationChoices.POST_APPROVED),
-            "post": post,
-        }
+            event = {
+                "title": "Post Approval",
+                "body": f"{post.title} post has been approved",
+                "slug": post.slug,
+                "notification_type": (Notification.NotificationChoices.POST_APPROVED),
+                "post": post,
+            }
 
         NotificationService.send_notification(user=post.author, event=event)
 
@@ -168,32 +170,33 @@ class PostView(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], permission_classes=[IsModeratorOrSuperAdmin])
     def reject(self, request, pk=None):
-        post = self.get_object()
-        if post.approval_status == Post.PostStatus.REJECTED:
-            return error_response(message="post already rejected", status=400)
-        reason = request.data.get("reason", "").strip()
-        if not reason:
-            return error_response(message="rejection reason is required", status=400)
-        post.approval_status = Post.PostStatus.REJECTED
-        post.reviewed_by = request.user
-        post.reviewed_at = timezone.now()
-        post.rejection_reason = reason
+        with transaction.atomic():
+            post = self.get_queryset().select_for_update().get(pk=pk)
+            if post.approval_status == Post.PostStatus.REJECTED:
+                return error_response(message="post already rejected", status=400)
+            reason = request.data.get("reason", "").strip()
+            if not reason:
+                return error_response(message="rejection reason is required", status=400)
+            post.approval_status = Post.PostStatus.REJECTED
+            post.reviewed_by = request.user
+            post.reviewed_at = timezone.now()
+            post.rejection_reason = reason
 
-        post.save(
-            update_fields=[
-                "approval_status",
-                "reviewed_by",
-                "rejection_reason",
-                "reviewed_at",
-            ]
-        )
+            post.save(
+                update_fields=[
+                    "approval_status",
+                    "reviewed_by",
+                    "rejection_reason",
+                    "reviewed_at",
+                ]
+            )
 
-        event = {
-            "title": "Post Rejected",
-            "post": post,
-            "body": f"{post.title} post has been rejected",
-            "notification_type": Notification.NotificationChoices.POST_REJECTED,
-        }
+            event = {
+                "title": "Post Rejected",
+                "post": post,
+                "body": f"{post.title} post has been rejected",
+                "notification_type": Notification.NotificationChoices.POST_REJECTED,
+            }
 
         NotificationService.send_notification(user=post.author, event=event)
 

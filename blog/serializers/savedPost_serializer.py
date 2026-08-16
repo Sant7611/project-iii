@@ -5,5 +5,5 @@ from blog.models import SavedPost
 class SavedPostSerializer(ModelSerializer):
     class Meta:
         model=SavedPost
-        fields = ["post"]
-        read_only_fileds = ('user',)
+        fields = ['id', "post",'user', 'created_at']
+        read_only_fields = ('user',)

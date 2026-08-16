@@ -1,4 +1,4 @@
-from django.db.models import Q, aggregates
+from django.db.models import Q, aggregates, Count
 from rest_framework import generics
 from blog.models import Post
 from utils.response_helper import success_response, error_response
@@ -15,19 +15,22 @@ class AdminDashboardView(generics.GenericAPIView):
 
     def get(self, request):
         try:
+            aggregations = {
+                "total_users": Count(
+                    "id", 
+                    filter=Q(is_active=True, role="user", is_deleted=False)
+                ),
+            }
 
-            user_stats = User.objects.aggregate(
-                total_users=aggregates.Count(
-                    "id", filter=Q(is_active=True, role="user", is_deleted=False)
+         
+            if request.user.role == "super_admin":
+                aggregations["total_moderators"] = Count(
+                    "id", 
+                    filter=Q(role="moderator", is_active=True, is_deleted=False)
                 )
-            )
-            
-            if request.user.role == 'super_admin':
-                user_stats += User.objects.aggregate(
-                total_moderators=aggregates.Count(
-                    "id", filter=Q(role="moderator", is_active=True, is_deleted=False)
-                ))
 
+            
+            user_stats = User.objects.aggregate(**aggregations)
             post_stats = Post.objects.aggregate(
                 total_posts=aggregates.Count("id")
                 ,

@@ -49,7 +49,9 @@ INSTALLED_APPS = [
     'dashboard',
     'notifications',
     'channels',
-    'management'
+    'management',
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -87,7 +89,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("redis", 6379)],
         },
     },
 }
@@ -158,7 +160,7 @@ STATIC_URL = 'static/'
 STATICFILESDIRS = [BASE_DIR/'static']
 
 MEDIA_URL='/media/'
-MEDIA_ROOT= BASE_DIR / 'static'
+MEDIA_ROOT= BASE_DIR / 'media'
 
 #for accessing user
 AUTH_USER_MODEL = 'accounts.User'
@@ -195,3 +197,12 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
 ]
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
