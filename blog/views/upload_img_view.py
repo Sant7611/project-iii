@@ -36,10 +36,17 @@ class ImageUploadView(APIView):
         # Generate unique filename
         ext = os.path.splitext(image.name)[1].lower()
         filename = f"uploads/{uuid.uuid4().hex}{ext}"
-
+ 
         # Save the file
         path = default_storage.save(filename, image)
-        image_url = request.build_absolute_uri(settings.MEDIA_URL + path)
+        
+        path = path.replace("\\", "/").lstrip("/")
+        if path.startswith("media/"):
+            path = path[len("media/"):]
+
+        image_url = request.build_absolute_uri(
+            settings.MEDIA_URL + path
+        )
 
         return success_response(
             message="Image uploaded successfully",
