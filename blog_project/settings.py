@@ -120,8 +120,6 @@ else:
         }
     }
 
-
-
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
@@ -158,6 +156,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILESDIRS = [BASE_DIR/'static']
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL='/media/'
 MEDIA_ROOT= BASE_DIR / 'media'
