@@ -1,7 +1,8 @@
 from django.test import TestCase
 from .utils.searchengine import SearchEngine
 from .utils.collaborativeRecommender import CollaborativeRecommender
-
+from rest_framework.test import APITestCase
+from rest_framework import status
 
 # Create your tests here.
 class TfIdfTest(TestCase):
@@ -30,6 +31,7 @@ class TfIdfTest(TestCase):
         results = self.engine.search("react")
         self.assertEqual(results, [])
 
+
 class CosineSimilarityTests(TestCase):
     """Tests for the math behind recommendations."""
 
@@ -38,14 +40,14 @@ class CosineSimilarityTests(TestCase):
         self.rec = CollaborativeRecommender()
         # type() creates fake objects without a database
         likes = [
-            type('Like', (), {'user_id': 1, 'post_id': 1}),
-            type('Like', (), {'user_id': 1, 'post_id': 2}),
-            type('Like', (), {'user_id': 1, 'post_id': 3}),
-            type('Like', (), {'user_id': 2, 'post_id': 1}),
-            type('Like', (), {'user_id': 2, 'post_id': 2}),
-            type('Like', (), {'user_id': 2, 'post_id': 4}),
-            type('Like', (), {'user_id': 3, 'post_id': 3}),
-            type('Like', (), {'user_id': 3, 'post_id': 4}),
+            type("Like", (), {"user_id": 1, "post_id": 1}),
+            type("Like", (), {"user_id": 1, "post_id": 2}),
+            type("Like", (), {"user_id": 1, "post_id": 3}),
+            type("Like", (), {"user_id": 2, "post_id": 1}),
+            type("Like", (), {"user_id": 2, "post_id": 2}),
+            type("Like", (), {"user_id": 2, "post_id": 4}),
+            type("Like", (), {"user_id": 3, "post_id": 3}),
+            type("Like", (), {"user_id": 3, "post_id": 4}),
         ]
         self.rec.build_matrix(likes)
 
@@ -64,6 +66,7 @@ class CosineSimilarityTests(TestCase):
         sim = self.rec.cosine_similarity({1, 2, 3}, {1, 2, 4})
         self.assertAlmostEqual(sim, 2 / 3, places=3)
 
+
 class RecommenderTests(TestCase):
     """Tests for the full recommendation pipeline."""
 
@@ -71,14 +74,14 @@ class RecommenderTests(TestCase):
         """ARRANGE: Same fake data as above."""
         self.rec = CollaborativeRecommender()
         likes = [
-            type('Like', (), {'user_id': 1, 'post_id': 1}),
-            type('Like', (), {'user_id': 1, 'post_id': 2}),
-            type('Like', (), {'user_id': 1, 'post_id': 3}),
-            type('Like', (), {'user_id': 2, 'post_id': 1}),
-            type('Like', (), {'user_id': 2, 'post_id': 2}),
-            type('Like', (), {'user_id': 2, 'post_id': 4}),
-            type('Like', (), {'user_id': 3, 'post_id': 3}),
-            type('Like', (), {'user_id': 3, 'post_id': 4}),
+            type("Like", (), {"user_id": 1, "post_id": 1}),
+            type("Like", (), {"user_id": 1, "post_id": 2}),
+            type("Like", (), {"user_id": 1, "post_id": 3}),
+            type("Like", (), {"user_id": 2, "post_id": 1}),
+            type("Like", (), {"user_id": 2, "post_id": 2}),
+            type("Like", (), {"user_id": 2, "post_id": 4}),
+            type("Like", (), {"user_id": 3, "post_id": 3}),
+            type("Like", (), {"user_id": 3, "post_id": 4}),
         ]
         self.rec.build_matrix(likes)
 
@@ -100,4 +103,10 @@ class RecommenderTests(TestCase):
         results = self.rec.recommend(1, n=5)
         scores = [score for _, score in results]
         self.assertEqual(scores, sorted(scores, reverse=True))
-    
+
+
+class BlogModelTest(APITestCase):
+    def test_course_gets_status_code_200(self):
+        response = self.client.get("api/posts/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

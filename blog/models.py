@@ -9,7 +9,6 @@ class Post(BaseModel):
     The core content model.
 
     DESIGN CHOICES EXPLAINED:
-    - status: 'draft' vs 'published' allows authors to work on posts before they go live.
     - slug: SEO-friendly URL piece. Auto-generated from title.
     - short_code: Generated AFTER save (via Base62) so we can use the post ID.
     - featured_img: Kept from your design! Good addition. upload_to organizes files.

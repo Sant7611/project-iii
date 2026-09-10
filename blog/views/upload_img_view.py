@@ -33,20 +33,19 @@ class ImageUploadView(APIView):
         if image.size > 5 * 1024 * 1024:
             return error_response(message="Image size should be less than 5MB", status=400)
 
-        # Generate unique filename
-        ext = os.path.splitext(image.name)[1].lower()
-        filename = f"uploads/{uuid.uuid4().hex}{ext}"
  
         # Save the file
-        path = default_storage.save(filename, image)
-        
-        path = path.replace("\\", "/").lstrip("/")
-        if path.startswith("media/"):
-            path = path[len("media/"):]
+        import cloudinary.uploader
 
-        image_url = request.build_absolute_uri(
-            settings.MEDIA_URL + path
+        upload_result = cloudinary.uploader.upload(
+            image,
+            folder="uploads",
+            public_id=uuid.uuid4().hex,
+            resource_type="image",
+            secure=True,
         )
+
+        image_url = upload_result["secure_url"]
 
         return success_response(
             message="Image uploaded successfully",
