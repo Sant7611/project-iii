@@ -21,7 +21,7 @@ from django.db import transaction
 
 
 class PostView(viewsets.ModelViewSet):
-    queryset = Post.objects.select_related("author").prefetch_related(
+    queryset = Post.objects.select_related("author", "author__profile").prefetch_related(
         "tags", "comments", "categories"
     )
     serializer_class = PostSerializer
