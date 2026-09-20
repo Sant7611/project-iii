@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
 from rest_framework_simplejwt.views import TokenRefreshView
 from blog.views.upload_img_view import ImageUploadView
+from blog.views.like_view import LikeView
 
 
 router = DefaultRouter()
@@ -22,6 +23,7 @@ urlpatterns = [
     path('search/', search_view.SearchView.as_view(), name='search'),
     path('upload/', ImageUploadView.as_view(), name='image-upload'),
     path('recommendation/', recommendation_view.Recommendation.as_view(), name='recommendation'),
+    path('posts/<int:post_id>/like/', LikeView.as_view(), name='post-like'),
     path('', include(post_comment_router.urls))
 
 
@@ -31,6 +33,5 @@ urlpatterns = [
     # path('api/posts/<int:post_id>/comments/', views.comment_list, name='comment_list'),
     # path('api/comments/<int:pk>/', views.comment_detail, name='comment_detail'),
     # path('api/search/', views.search, name='search'), 
-    # path('api/posts/<int:post_id>/like/', views.like, name='like'),
     # path('api/posts/recommend/<int:user_id>/', views.recommender, name='recommender')
 ]
