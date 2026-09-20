@@ -26,6 +26,23 @@ class PostCreateUpdateSerializer(BaseModelSerializer):
         model=Post
         fields = ['id','title', 'content', 'tags', 'featured_img', 'clear_featured_img']
 
+    def validate_featured_img(self, image):
+        if not image:
+            return image
+
+        allowed_types = {'image/jpeg', 'image/png', 'image/webp', 'image/gif'}
+        if getattr(image, 'content_type', '') not in allowed_types:
+            raise serializers.ValidationError(
+                'Only JPEG, PNG, WebP and GIF cover images are allowed.'
+            )
+
+        if image.size > 5 * 1024 * 1024:
+            raise serializers.ValidationError(
+                'Cover image size should be less than 5MB.'
+            )
+
+        return image
+
     def create(self, validated_data):
         tags = validated_data.pop('tags', None)
         validated_data.pop('clear_featured_img', None)
