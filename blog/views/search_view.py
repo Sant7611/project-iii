@@ -20,7 +20,7 @@ class SearchView(APIView):
         rankings = self.se.search(query)
         post_ids = [post_id for post_id,score in rankings]
 
-        posts = Post.objects.filter(id__in=post_ids, approval_status=Post.PostStatus.APPROVED).select_related('author', 'author__profile')
+        posts = Post.objects.filter(id__in=post_ids, approval_status=Post.PostStatus.APPROVED).select_related('author', 'author__profile').prefetch_related('tags')
 
         post_dict= {post.id:post for post in posts }
         ordered_posts = [post_dict[pid] for pid in post_ids if pid in post_dict ]
