@@ -1,3 +1,4 @@
+from django.core.files.storage import default_storage
 from rest_framework import serializers
 from blog.models import Post, Tag
 from base.serializers import BaseModelSerializer
@@ -39,16 +40,17 @@ class PostCreateUpdateSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags', None)
         clear_featured_img = validated_data.pop('clear_featured_img', False)
-        old_image_name = instance.featured_img.name if clear_featured_img and instance.featured_img else ''
+        replacing_image = 'featured_img' in validated_data
+        old_image_name = instance.featured_img.name if instance.featured_img else ''
 
         if clear_featured_img:
             validated_data['featured_img'] = None
 
         post = super().update(instance, validated_data)
 
-        if old_image_name:
+        if old_image_name and (clear_featured_img or replacing_image):
             try:
-                instance.featured_img.storage.delete(old_image_name)
+                default_storage.delete(old_image_name)
             except Exception:
                 pass
         
